@@ -1,0 +1,257 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2761
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 <!DOCTYPE html>\
+<html lang="en">\
+\
+<head>\
+    <meta charset="UTF-8">\
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">\
+    <title>Chatbot Interface</title>\
+    <style>\
+        body \{\
+            font-family: Arial, sans-serif;\
+            background-color: #f4f4f4;\
+            margin: 0;\
+            padding: 0;\
+            display: flex;\
+            justify-content: center;\
+            align-items: center;\
+            height: 100vh;\
+        \}\
+\
+        .chat-container \{\
+            width: 400px;\
+            background-color: white;\
+            border-radius: 10px;\
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);\
+            display: flex;\
+            flex-direction: column;\
+            overflow: hidden;\
+        \}\
+\
+        .chat-header \{\
+            display: flex;\
+            justify-content: space-between;\
+            align-items: center;\
+            padding: 20px;\
+            background-color: #7854f7;\
+            color: white;\
+        \}\
+\
+        .chat-header h3 \{\
+            margin: 0;\
+            font-size: 18px;\
+        \}\
+\
+        .toggle-container \{\
+            display: flex;\
+            gap: 10px;\
+        \}\
+\
+        .toggle-button \{\
+            padding: 5px 10px;\
+            border: none;\
+            background-color: white;\
+            color: #7854f7;\
+            cursor: pointer;\
+            border-radius: 20px;\
+            font-size: 12px;\
+        \}\
+\
+        .toggle-button.active \{\
+            background-color: #fefefe;\
+            border: 2px solid #7854f7;\
+            color: #7854f7;\
+        \}\
+\
+        .chat-body \{\
+            flex-grow: 1;\
+            padding: 20px;\
+            background-color: #f4f4f4;\
+            overflow-y: auto;\
+        \}\
+\
+        .chat-message \{\
+            margin-bottom: 15px;\
+        \}\
+\
+        .chat-message.user h4 \{\
+            font-size: 14px;\
+            color: #333;\
+            margin: 0 0 5px 0;\
+        \}\
+\
+        .chat-message.bot p \{\
+            font-size: 14px;\
+            color: #4c4c4c;\
+            background-color: #fff;\
+            border-radius: 10px;\
+            padding: 10px;\
+            margin: 0;\
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);\
+        \}\
+\
+        .chat-footer \{\
+            display: flex;\
+            align-items: center;\
+            padding: 20px;\
+            background-color: #fff;\
+            border-top: 1px solid #e5e5e5;\
+        \}\
+\
+        .chat-footer input \{\
+            flex-grow: 1;\
+            padding: 10px;\
+            border: 1px solid #ddd;\
+            border-radius: 20px;\
+            font-size: 14px;\
+        \}\
+\
+        .chat-footer button \{\
+            padding: 10px 15px;\
+            background-color: #7854f7;\
+            color: white;\
+            border: none;\
+            border-radius: 20px;\
+            margin-left: 10px;\
+            cursor: pointer;\
+        \}\
+    </style>\
+</head>\
+\
+<body>\
+\
+    <div class="chat-container">\
+        <!-- Header with Toggle -->\
+        <div class="chat-header">\
+            <h3>Chatbot</h3>\
+            <div class="toggle-container">\
+                <button id="gptToggle" class="toggle-button active">ChatGPT</button>\
+                <button id="csrToggle" class="toggle-button">CSR Data</button>\
+            </div>\
+        </div>\
+\
+        <!-- Chat Body -->\
+        <div class="chat-body" id="chatBody">\
+            <div class="chat-message bot">\
+                <p>How can I help you today?</p>\
+            </div>\
+        </div>\
+\
+        <!-- Chat Footer -->\
+        <div class="chat-footer">\
+            <input type="text" id="userInput" placeholder="Type your message here...">\
+            <button id="sendButton">Send</button>\
+        </div>\
+    </div>\
+\
+    <script>\
+        // Variables for toggling between GPT and CSR modes\
+        const gptToggle = document.getElementById('gptToggle');\
+        const csrToggle = document.getElementById('csrToggle');\
+        let currentMode = 'gpt'; // Default mode\
+\
+        gptToggle.addEventListener('click', () => \{\
+            currentMode = 'gpt';\
+            gptToggle.classList.add('active');\
+            csrToggle.classList.remove('active');\
+        \});\
+\
+        csrToggle.addEventListener('click', () => \{\
+            currentMode = 'csr';\
+            gptToggle.classList.remove('active');\
+            csrToggle.classList.add('active');\
+        \});\
+\
+        // Chat functionality\
+        const chatBody = document.getElementById('chatBody');\
+        const userInput = document.getElementById('userInput');\
+        const sendButton = document.getElementById('sendButton');\
+\
+        sendButton.addEventListener('click', () => \{\
+            const userMessage = userInput.value;\
+            if (userMessage.trim() === '') return;\
+\
+            // Display user message in chat\
+            const userMsgDiv = document.createElement('div');\
+            userMsgDiv.classList.add('chat-message', 'user');\
+            userMsgDiv.innerHTML = `<h4>You:</h4><p>$\{userMessage\}</p>`;\
+            chatBody.appendChild(userMsgDiv);\
+            userInput.value = ''; // Clear input field\
+\
+            // Scroll to bottom of chat\
+            chatBody.scrollTop = chatBody.scrollHeight;\
+\
+            // Fetch API response based on selected mode\
+            if (currentMode === 'gpt') \{\
+                fetchGPTResponse(userMessage);\
+            \} else \{\
+                fetchCSRResponse(userMessage);\
+            \}\
+        \});\
+\
+        function fetchGPTResponse(message) \{\
+            fetch('https://api.openai.com/v1/completions', \{\
+                method: 'POST',\
+                headers: \{\
+                    'Content-Type': 'application/json',\
+                    'Authorization': 'Bearer 
+\fs32 \expnd0\expndtw0\kerning0
+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
+\fs24 \kerning1\expnd0\expndtw0 '\
+                \},\
+                body: JSON.stringify(\{\
+                    model: "gpt-3.5-turbo",\
+                    messages: [\{ role: "user", content: message \}],\
+                    max_tokens: 150\
+                \})\
+            \})\
+            .then(response => response.json())\
+            .then(data => \{\
+                const botResponse = data.choices[0].message.content;\
+                displayBotResponse(botResponse);\
+            \})\
+            .catch(error => \{\
+                displayBotResponse("Error fetching response from ChatGPT.");\
+            \});\
+        \}\
+\
+        function fetchCSRResponse(message) \{\
+            fetch('https://api.csrdata.com/query', \{\
+                method: 'POST',\
+                headers: \{\
+                    'Content-Type': 'application/json',\
+                    'Authorization': 'Bearer YOUR_CSR_API_KEY'\
+                \},\
+                body: JSON.stringify(\{ query: message \})\
+            \})\
+            .then(response => response.json())\
+            .then(data => \{\
+                const botResponse = data.response;\
+                displayBotResponse(botResponse);\
+            \})\
+            .catch(error => \{\
+                displayBotResponse("Error fetching response from CSR Data.");\
+            \});\
+        \}\
+\
+        function displayBotResponse(response) \{\
+            const botMsgDiv = document.createElement('div');\
+            botMsgDiv.classList.add('chat-message', 'bot');\
+            botMsgDiv.innerHTML = `<p>$\{response\}</p>`;\
+            chatBody.appendChild(botMsgDiv);\
+\
+            // Scroll to bottom of chat\
+            chatBody.scrollTop = chatBody.scrollHeight;\
+        \}\
+    </script>\
+\
+</body>\
+\
+</html>\
+}
